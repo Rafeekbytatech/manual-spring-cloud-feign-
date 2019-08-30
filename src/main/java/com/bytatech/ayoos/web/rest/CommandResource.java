@@ -163,6 +163,7 @@ public class CommandResource {
 		personBodyCreate.setFirstName(patientDTO.getPatientCode());
 		personBodyCreate.setEmail(patientDTO.getPatientCode()+"@gmail.com");
 		personBodyCreate.setPassword(patientDTO.getPatientCode());
+		personBodyCreate.setEnabled(false);
 		peopleApi.createPerson(personBodyCreate, null);
 
 	}
