@@ -3,11 +3,15 @@ package com.bytatech.ayoos.web.rest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.FeignClientsConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,41 +21,105 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bytatech.ayoos.client.patient_dms.api.*;
 import com.bytatech.ayoos.client.patient_dms.model.*;
 import com.bytatech.ayoos.client.patient_dms.model.SiteBodyCreate.VisibilityEnum;
+import com.bytatech.ayoos.domain.User;
+import com.bytatech.ayoos.security.SecurityUtils;
 import com.bytatech.ayoos.service.*;
 import com.bytatech.ayoos.service.dto.AddressLineDTO;
 import com.bytatech.ayoos.service.dto.PatientDTO;
 import com.bytatech.ayoos.web.rest.errors.BadRequestAlertException;
 import com.bytatech.ayoos.web.rest.util.HeaderUtil;
 
+import feign.Client;
 import feign.Feign;
 import feign.auth.BasicAuthRequestInterceptor;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 
+@Import(FeignClientsConfiguration.class)
 @RestController
 //@RequestMapping("/api/commands")
-public class CommandResource {
+public class CommandResource1 {
 
-	private final Logger log = LoggerFactory.getLogger(CommandResource.class);
+	private final Logger log = LoggerFactory.getLogger(CommandResource1.class);
 
 	private static final String ENTITY_NAME = "Patient";
 
+	private SitesApi sitesApi;
+
+	private FooClient fooClient;
+//	private PeopleApi peopleApi;
 	@Autowired
-	PeopleApi peopleApi;
-	@Autowired
+	private PeopleApi peopleApis;
 	private Decoder decoder;
-	@Autowired
+	
 	private Encoder encoder;
 
-	private final CommandService commandService;
-	private final AddressLineService addressLineService;
+	
+	  private CommandService commandService;
+	  private  AddressLineService addressLineService;
+	  private  UserService user;
+	@Autowired
+	  public CommandResource1(Encoder encoder,Decoder decoder,CommandService commandService, AddressLineService
+			  addressLineService, UserService user) {
+      this.encoder=encoder;
+      this.decoder=decoder;
+      this.commandService = commandService;
+	  this.addressLineService = addressLineService; this.user=user;
+	  }
+	  
+	  
+	
+	/*public void getPeopleApiClient(String userName, String password) {
+		this.peopleApi = Feign.builder().encoder(encoder).decoder(decoder)
+				.requestInterceptor(new BasicAuthRequestInterceptor(userName, password))
+				.target(PeopleApi.class, "http://34.68.17.132:8013/alfresco/api/-default-/public/alfresco/versions/1");
+	}*/
+	
+	public void getSiteApiClient(String userName, String password) {
+		this.fooClient = Feign.builder().encoder(encoder).decoder(decoder)
+				.requestInterceptor(new BasicAuthRequestInterceptor("userName", "password"))
+				.target(FooClient.class, "http://34.68.17.132:8013/alfresco/api/-default-/public/alfresco/versions/1");
+	}
 
-	public CommandResource(Encoder encoder,Decoder decoder, CommandService commandService,
-			AddressLineService addressLineService) {
-		this.encoder = encoder;
-		this.decoder = decoder;
-		this.commandService = commandService;
-		this.addressLineService = addressLineService;
+	/**
+	 * } Create a new patientDMS-Site.
+	 *
+	 * @param siteId
+	 *            the patientDMS-Site to create
+	 *
+	 */
+
+	/*public String createSite(String siteId) {
+		
+
+		SiteBodyCreate siteBodyCreate = new SiteBodyCreate();
+		siteBodyCreate.setTitle(siteId);
+		siteBodyCreate.setId(siteId);
+		siteBodyCreate.setVisibility(VisibilityEnum.MODERATED);
+		SiteEntry entry = fooClient.createSite(siteBodyCreate).getBody();
+		return entry.getEntry().getId();
+	}*/
+
+@PostMapping("/test")
+	public void createPerson() {
+		log.debug("=================into the process createPeople()===========");
+		
+		//getSiteApiClient("deer","deer");
+		PersonBodyCreate personBodyCreate = new PersonBodyCreate();
+		personBodyCreate.setFirstName("door1");
+		personBodyCreate.email("door1@lxisoft.com");
+		personBodyCreate.setId("door1");
+		personBodyCreate.setPassword("door1");
+		peopleApis.createPerson(personBodyCreate,null);
+		
+		/*this.fooClient = Feign.builder().encoder(encoder).decoder(decoder)
+				.requestInterceptor(new BasicAuthRequestInterceptor("deer", "deer"))
+				.target(FooClient.class, "http://34.68.17.132:8013/alfresco/api/-default-/public/alfresco/versions/1");
+		SiteBodyCreate siteBodyCreate = new SiteBodyCreate();
+		siteBodyCreate.setTitle("deersite");
+		siteBodyCreate.setId("deersite");
+		siteBodyCreate.setVisibility(VisibilityEnum.MODERATED);
+		fooClient.createSite(siteBodyCreate);*/
 	}
 
 	/**
@@ -66,24 +134,39 @@ public class CommandResource {
 	 *             if the Location URI syntax is incorrect
 	 */
 
-	
-	  @PostMapping("/patients") 
-	  public ResponseEntity<PatientDTO> createPatient(@RequestBody PatientDTO patientDTO) throws URISyntaxException {
-	  log.debug("REST request to save Patient : {}", patientDTO); if
-	  (patientDTO.getId() != null) { throw new
-	  BadRequestAlertException("A new patient cannot already have an ID",
-	  ENTITY_NAME, "idexists"); }
-	  createPersonOnDMS(patientDTO);
-	  
-	  SitesApi site=getSiteApiClient(patientDTO.getPatientCode(),patientDTO.getPatientCode());
-	  
-	  String siteId= patientDTO.getPatientCode()+"site";
-	  String dmsId = createSite(site,siteId);
-	  patientDTO.setDmsId(dmsId); 
-	  PatientDTO result = commandService.save(patientDTO);
-	  
-	  return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
-	  result.getId().toString())) .body(result); }
+/*	@PostMapping("/patients")
+	public ResponseEntity<PatientDTO> createPatient(@RequestBody PatientDTO patientDTO) throws URISyntaxException {
+		log.debug("REST request to save Patient : {}", patientDTO);
+		if (patientDTO.getId() != null) {
+			throw new BadRequestAlertException("A new patient cannot already have an ID", ENTITY_NAME, "idexists");
+		}
+
+		///// To get username from Keycloak
+
+		Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+		String currentUser = currentUserLogin.get();
+		log.debug("=================currentUser===========: {}", currentUser);
+
+	//	createPerson(currentUser, patientDTO.getPatientCode());
+		
+		getSiteApiClient(currentUser,currentUser);
+		
+
+	//	String dmsId = createSite(patientDTO.getPatientCode());
+
+		//log.debug("++++++++++++++++++dmsId for Alfresco site creation", dmsId);
+
+		//patientDTO.setDmsId(dmsId); // PatientDTO result =
+		commandService.save(patientDTO);
+
+		PatientDTO resultDTO = commandService.save(patientDTO);
+		if (resultDTO.getId() == null) {
+			throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+		}
+		PatientDTO result = commandService.save(resultDTO);
+		return ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, result.getId().toString()))
+				.body(result);
+	}*/
 
 	/**
 	 * PUT /patients : Updates an existing patient.
@@ -101,7 +184,7 @@ public class CommandResource {
 	 * @PutMapping("/patients") public ResponseEntity<PatientDTO>
 	 * updatePatient(@RequestBody PatientDTO patientDTO) throws URISyntaxException {
 	 * log.debug("REST request to update Patient : {}", patientDTO); if
-	 * (patientDTO.getId() == null) { throw new
+	 * (patientDTO.getId() != null) { throw new
 	 * BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull"); } PatientDTO
 	 * result = commandService.save(patientDTO); return ResponseEntity.ok()
 	 * .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
@@ -132,6 +215,7 @@ public class CommandResource {
 	 * ResponseEntity.ok().headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
 	 * result.getId().toString())) .body(result); }
 	 */
+
 	/**
 	 * PUT /address-lines : Updates an existing addressLine.
 	 *
@@ -154,45 +238,5 @@ public class CommandResource {
 	 * ResponseEntity.ok() .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME,
 	 * addressLineDTO.getId().toString())) .body(result); }
 	 */
-
-	public void createPersonOnDMS(PatientDTO patientDTO) {
-		log.debug("=================into the process createPeople()===========");
-
-		PersonBodyCreate personBodyCreate = new PersonBodyCreate();
-		personBodyCreate.setId(patientDTO.getPatientCode());
-		personBodyCreate.setFirstName(patientDTO.getPatientCode());
-		personBodyCreate.setPassword(patientDTO.getPatientCode());
-		peopleApi.createPerson(personBodyCreate, null);
-
-	}
-
-	public PersonEntry getPersonOnDMS(String patientCode) {
-		return peopleApi.getPerson(patientCode, null).getBody();
-	}
-
-	public SitesApi getSiteApiClient(String userName, String password) {
-		SitesApi sitesApi = Feign.builder().encoder(encoder).decoder(decoder)
-				.requestInterceptor(new BasicAuthRequestInterceptor("userName", "password"))
-				.target(SitesApi.class, "http://34.74.192.113:8082/alfresco/api/-default-/public/alfresco/versions/1");
-	
-		return sitesApi;
-	}
-
-	/**
-	 * Create a new patientDMS-Site.
-	 *
-	 * @param siteId
-	 *            the patientDMS-Site to create
-	 *
-	 */
-
-	public String createSite(SitesApi site,String siteId) {
-		SiteBodyCreate siteBodyCreate = new SiteBodyCreate();
-		siteBodyCreate.setTitle(siteId);
-		siteBodyCreate.setId(siteId);
-		siteBodyCreate.setVisibility(VisibilityEnum.MODERATED);
-		SiteEntry entry = site.createSite(siteBodyCreate).getBody();
-		return entry.getEntry().getId();
-	}
 
 }
