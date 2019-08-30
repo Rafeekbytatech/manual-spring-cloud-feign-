@@ -86,7 +86,7 @@ spring:
                    data: target/elasticsearch/data
         jest:
            readTimeout: 10000
-           password: D022NWI8x1Z42QPg40vq25S4
+           password: YjmXxrSuAGlEo30uK4IW94cw
            username: elastic
            uri: https://507f5edb2bc243509cf817eb605aea0f.asia-northeast1.gcp.cloud.es.io:9243/
     liquibase:
