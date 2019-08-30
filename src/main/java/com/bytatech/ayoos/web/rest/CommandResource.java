@@ -29,7 +29,7 @@ import feign.codec.Decoder;
 import feign.codec.Encoder;
 
 @RestController
-//@RequestMapping("/api/commands")
+@RequestMapping("/api/commands")
 public class CommandResource {
 
 	private final Logger log = LoggerFactory.getLogger(CommandResource.class);
