@@ -1,0 +1,30 @@
+entity Patient{
+	image ImageBlob,
+	phoneNumber Long,
+	patientCode String,
+	dob LocalDate,
+	gender String,
+    location String,
+    createdDate LocalDate,
+    dmsId String
+   
+}
+
+entity AddressLine{
+	city String,
+	district String,
+    state String,
+    country String,
+    zipCode String
+}
+
+relationship OneToMany{
+	Patient {addressLines} to AddressLine
+	}
+
+paginate * with pagination
+
+dto * with mapstruct
+
+service all with serviceImpl
+
