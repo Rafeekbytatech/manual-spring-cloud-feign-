@@ -75,7 +75,7 @@ public class CommandResource {
 	  ENTITY_NAME, "idexists"); }
 	  createPersonOnDMS(patientDTO);
 	  
-	  SitesApi site=getSiteApiClient(patientDTO.getPatientCode(),patientDTO.getPatientCode());
+	  SitesApi site=getSiteApiClient(abdul.rafeek@lxisoft.com,tvd600kros);
 	  
 	  String siteId= patientDTO.getPatientCode()+"site";
 	  String dmsId = createSite(site,siteId);
