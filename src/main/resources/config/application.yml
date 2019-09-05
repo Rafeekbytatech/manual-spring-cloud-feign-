@@ -213,5 +213,5 @@ patientDMS:
 # url: http://34.68.17.132:8013/alfresco/api/-default-/public/alfresco/versions/1
   security:
     basicAuth:
-       username: admin   
-       password: admin
+       username: abdul.rafeek@lxisoft.com   
+       password: tvd600kros
