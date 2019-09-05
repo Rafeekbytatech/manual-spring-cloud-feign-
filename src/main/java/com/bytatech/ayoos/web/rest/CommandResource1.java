@@ -59,7 +59,7 @@ public class CommandResource1 {
 	private AddressLineService addressLineService;
 	private UserService user;
 
-	@Autowired
+	//@Autowired
 	public CommandResource1(Encoder encoder, Decoder decoder, CommandService commandService,
 			AddressLineService addressLineService, UserService user) {
 		this.encoder = encoder;
