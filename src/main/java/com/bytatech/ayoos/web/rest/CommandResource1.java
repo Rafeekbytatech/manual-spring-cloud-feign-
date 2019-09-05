@@ -38,17 +38,17 @@ import feign.codec.Encoder;
 
 @Import(FeignClientsConfiguration.class)
 @RestController
-// @RequestMapping("/api/commands")
+
 public class CommandResource1 {
 
 	private final Logger log = LoggerFactory.getLogger(CommandResource1.class);
 
 	private static final String ENTITY_NAME = "Patient";
 
-	//private SitesApi sitesApi;
+
 
 	private FooClient fooClient;
-	// private PeopleApi peopleApi;
+	
 	@Autowired
 	private PeopleApi peopleApis;
 	private Decoder decoder;
@@ -78,7 +78,7 @@ public class CommandResource1 {
 	
 	public FooClient getSiteApiClient(String userName, String password) {
 		this.fooClient = Feign.builder().encoder(encoder).decoder(decoder)
-				.requestInterceptor(new BasicAuthRequestInterceptor("userName", "password"))
+				.requestInterceptor(new BasicAuthRequestInterceptor(userName, password))
 				.target(FooClient.class, "https://tohpih.trial.alfresco.com/alfresco/api/-default-/public/alfresco/versions/1");
 	
 		return fooClient;
