@@ -175,7 +175,7 @@ public class CommandResource {
 	public SitesApi getSiteApiClient(String userName, String password) {
 		SitesApi sitesApi = Feign.builder().encoder(encoder).decoder(decoder)
 				.requestInterceptor(new BasicAuthRequestInterceptor("userName", "password"))
-				.target(SitesApi.class, "http://34.74.192.113:8082/alfresco/api/-default-/public/alfresco/versions/1");
+				.target(SitesApi.class, "https://tohpih.trial.alfresco.com/alfresco/api/-default-/public/alfresco/versions/1");
 	
 		return sitesApi;
 	}
