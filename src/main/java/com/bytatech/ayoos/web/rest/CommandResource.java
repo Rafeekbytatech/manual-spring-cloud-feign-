@@ -39,9 +39,9 @@ import feign.codec.Encoder;
 @Import(FeignClientsConfiguration.class)
 @RestController
 
-public class CommandResource1 {
+public class CommandResource {
 
-	private final Logger log = LoggerFactory.getLogger(CommandResource1.class);
+	private final Logger log = LoggerFactory.getLogger(CommandResource.class);
 
 	private static final String ENTITY_NAME = "Patient";
 
@@ -59,8 +59,8 @@ public class CommandResource1 {
 	private AddressLineService addressLineService;
 	private UserService user;
 
-	//@Autowired
-	public CommandResource1(Encoder encoder, Decoder decoder, CommandService commandService,
+
+	public CommandResource(Encoder encoder, Decoder decoder, CommandService commandService,
 			AddressLineService addressLineService, UserService user) {
 		this.encoder = encoder;
 		this.decoder = decoder;
@@ -71,7 +71,7 @@ public class CommandResource1 {
 
 	@GetMapping("/test/{s}")
 	public void Test(@PathVariable String s) {
-		 FooClient foo= getSiteApiClient("abdul.rafeek@lxisoft.com","tvd600kros");
+		 FooClient foo= getSiteApiClient("abdul.rafeek@com","tks");
 		createSite(foo,s);
 	}
 	
